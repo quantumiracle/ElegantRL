@@ -154,7 +154,7 @@ class AgentBase:
             states = next_states
 
         self.states = states
-        return self.convert_trajectory(traj_list, last_dones)  # traj_list
+        return self.convert_trajectory(traj_list, last_dones) # traj_list
 
     def update_net(self, buffer: ReplayBuffer) -> tuple:
         return 0.0, 0.0
@@ -279,7 +279,8 @@ class AgentBase:
     ) -> List[Tensor]:
         # assert len(buf_items[0]) in {4, 5}
         # assert len(buf_items[0][0]) == self.env_num
-        traj_list1 = [map(list, zip(*traj_list))]  # state, reward, done, action, noise
+        # traj_list1 = [map(list, zip(*traj_list))]  # state, reward, done, action, noise
+        traj_list1 = list(map(list, zip(*traj_list)))  # state, reward, done, action, noise
         del traj_list
         # assert len(buf_items[0]) == step
         # assert len(buf_items[0][0]) == self.env_num

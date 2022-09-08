@@ -11,7 +11,7 @@ class Evaluator:
     def __init__(self, cwd: str, agent_id: int, eval_env, args: Arguments):
         self.recorder = []  # total_step, r_avg, r_std, obj_c, ...
         self.recorder_path = f'{cwd}/recorder.npy'
-
+        self.tensorboard = SummaryWriter(f"{cwd}/tensorboard")
         self.cwd = cwd
         self.agent_id = agent_id
         self.eval_env = eval_env
@@ -78,10 +78,18 @@ class Evaluator:
                       f"{self.agent_id:<3}{self.total_step:8.2e}{self.target_return:8.2f} |"
                       f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                       f"{self.used_time:>8}  ########")
-
+                
             print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
                   f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                   f"{r_exp:8.2f}{''.join(f'{n:7.2f}' for n in log_tuple)}")
+
+            self.tensorboard.add_scalar("info/r_max", self.r_max, self.total_step)
+            self.tensorboard.add_scalar("info/r_avg", r_avg, self.total_step)
+            self.tensorboard.add_scalar("info/r_std", r_std, self.total_step)
+            self.tensorboard.add_scalar("info/s_avg", s_avg, self.total_step)
+            self.tensorboard.add_scalar("info/s_std", s_std, self.total_step)
+            self.tensorboard.add_scalar("info/used_time", self.used_time, self.total_step)
+            self.tensorboard.add_scalar("info/r_exp", self.used_time, self.total_step)
 
             if hasattr(self.eval_env, 'curriculum_learning_for_evaluator'):
                 self.eval_env.curriculum_learning_for_evaluator(r_avg)
