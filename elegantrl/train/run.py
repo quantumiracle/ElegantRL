@@ -15,7 +15,6 @@ from elegantrl.train.replay_buffer import ReplayBuffer, ReplayBufferList
 def init_agent(args: Arguments, gpu_id: int, env=None) -> AgentBase:
     agent = args.agent_class(args.net_dim, args.state_dim, args.action_dim, gpu_id=gpu_id, args=args)
     agent.save_or_load_agent(args.cwd, if_save=False)
-
     if env is not None:
         '''assign `agent.states` for exploration'''
         if args.env_num == 1:
@@ -102,6 +101,7 @@ def train_and_evaluate(args):
     del args
 
     if_train = True
+    skip_cnt = 0
     while if_train:
         trajectory = agent.explore_env(env, horizon_len)
         steps, r_exp = buffer.update_buffer((trajectory,))
@@ -126,6 +126,9 @@ def train_and_evaluate(args):
                 and evaluator.total_step <= break_step
                 and stop_dir_absent
         )
+        skip_cnt += 1
+        if skip_cnt % 10 == 0:
+            agent.save_or_load_agent(cwd, if_save=True)
     print(f'| UsedTime: {time.time() - evaluator.start_time:.0f} | SavedDir: {cwd}')
 
     agent.save_or_load_agent(cwd, if_save=True)
@@ -213,6 +216,7 @@ class PipeLearner:
 
         '''loop'''
         if_train = True
+        skip_cnt = 0 
         while if_train:
             traj_list = comm_exp.explore(agent)
             steps, r_exp = buffer.update_buffer(traj_list)
@@ -222,6 +226,10 @@ class PipeLearner:
             torch.set_grad_enabled(False)
             # wandb.log({"obj_cri": logging_tuple[0], "obj_act": logging_tuple[1]})
             if_train, if_save = comm_eva.evaluate_and_save_mp(agent.act, steps, r_exp, logging_tuple)
+            skip_cnt += 1
+            if skip_cnt % 10 == 0:
+                agent.save_or_load_agent(cwd, if_save=True)
+
         agent.save_or_load_agent(cwd, if_save=True)
         print(f'| Learner: Save in {cwd}')
 
