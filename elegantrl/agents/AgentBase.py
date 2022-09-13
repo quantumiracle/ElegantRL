@@ -342,6 +342,7 @@ class AgentBase:
                 load_torch_file(obj, save_path) if os.path.isfile(save_path) else None
             if os.path.isfile(save_path):
                 print(f"Successful loading models from {cwd}.")
+            else:
                 print(f"Failed loading models from {cwd}.")
 
     def get_buf_h_term_k(
