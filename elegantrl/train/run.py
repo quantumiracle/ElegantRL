@@ -104,13 +104,13 @@ def train_and_evaluate(args):
     skip_cnt = 0
     while if_train:
         trajectory = agent.explore_env(env, horizon_len)
-        steps, r_exp = buffer.update_buffer((trajectory,))
         if if_off_policy:
-            buffer.update_buffer(trajectory)
+            steps, r_exp = buffer.update_buffer(trajectory)
             torch.set_grad_enabled(True)
             logging_tuple = agent.update_net(buffer)
             torch.set_grad_enabled(False)
         else:
+            steps, r_exp = buffer.update_buffer((trajectory,))
             torch.set_grad_enabled(True)
             logging_tuple = agent.update_net(trajectory)
             torch.set_grad_enabled(False)
