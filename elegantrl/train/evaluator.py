@@ -5,6 +5,7 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from elegantrl.train.config import Arguments
 # import wandb
+import logging
 
 
 class Evaluator:
@@ -25,7 +26,7 @@ class Evaluator:
         self.used_time = 0
         self.total_step = 0
         self.start_time = time.time()
-        print(f"{'#' * 80}\n"
+        logging.info(f"{'#' * 80}\n"
               f"{'ID':<3}{'Step':>8}{'maxR':>8} |"
               f"{'avgR':>8}{'stdR':>7}{'avgS':>7}{'stdS':>6} |"
               f"{'expR':>8}{'objC':>7}{'etc.':>7}")
@@ -63,23 +64,23 @@ class Evaluator:
                 act_path = f"{self.cwd}/actor__{self.total_step:012}_{self.r_max:09.3f}.pth"
                 torch.save(act.state_dict(), act_path)  # save policy network in *.pth
 
-                print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and print
+                logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and logging.info
 
             '''record the training information'''
             self.recorder.append((self.total_step, r_avg, r_std, r_exp, *log_tuple))  # update recorder
 
-            '''print some information to Terminal'''
+            '''logging.info some information to Terminal'''
             if_reach_goal = bool(self.r_max > self.target_return)  # check if_reach_goal
             if if_reach_goal and self.used_time is None:
                 self.used_time = int(time.time() - self.start_time)
-                print(f"{'ID':<3}{'Step':>8}{'TargetR':>8} |"
+                logging.info(f"{'ID':<3}{'Step':>8}{'TargetR':>8} |"
                       f"{'avgR':>8}{'stdR':>7}{'avgS':>7}{'stdS':>6} |"
                       f"{'UsedTime':>8}  ########\n"
                       f"{self.agent_id:<3}{self.total_step:8.2e}{self.target_return:8.2f} |"
                       f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                       f"{self.used_time:>8}  ########")
                 
-            print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
+            logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
                   f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                   f"{r_exp:8.2f}{''.join(f'{n:7.2f}' for n in log_tuple)}")
 
@@ -96,7 +97,7 @@ class Evaluator:
 
             '''plot learning curve figure'''
             if len(self.recorder) == 0:
-                print("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
+                logging.info("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
                 return None
 
             np.save(self.recorder_path, self.recorder)
@@ -141,7 +142,7 @@ class Evaluator_isaacgym:
         self.used_time = 0
         self.total_step = 0
         self.start_time = time.time()
-        print(f"{'#' * 80}\n"
+        logging.info(f"{'#' * 80}\n"
               f"{'ID':<3}{'Step':>8}{'Time':>8} |"
               f"{'maxR':>8}{'curR':>8}{'curS':>8} |"
               f"{'objC':>8}{'objA':>7}{'etc.':>7}")
@@ -163,7 +164,7 @@ class Evaluator_isaacgym:
                     self.r_max = r_exp  # update max reward (episode return)
                     act_path = f"{self.cwd}/actor_{self.total_step:08}_{self.r_max:09.3f}.pth"
                     torch.save(act.state_dict(), act_path)  # save policy network in *.pth
-                    # print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and print
+                    # logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and logging.info
 
             '''record the training information'''
             self.used_time = int(time.time() - self.start_time)
@@ -181,15 +182,15 @@ class Evaluator_isaacgym:
             self.tensorboard.add_scalar("info/env_step_sample", step_exp, self.used_time)
             self.tensorboard.add_scalar("reward/reward_time", r_exp, self.used_time)
             
-            '''print some information to Terminal'''
+            '''logging.info some information to Terminal'''
             if_reach_goal = bool(self.r_max > self.target_return or self.total_step > self.target_step)  # check if_reach_goal
 
-            print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.used_time:>8} |"
+            logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.used_time:>8} |"
                     f"{self.r_max:8.2f}{r_exp:8.2f}{step_exp:8.2f} |"
                     f"{''.join(f'{n:7.2f}' for n in log_tuple)}")
 
             if len(self.recorder) == 0:
-                    print("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
+                    logging.info("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
                     return None
             np.save(self.recorder_path, self.recorder)
 
@@ -225,7 +226,7 @@ class Evaluator_isaacgym:
                 act_path = f"{self.cwd}/actor_{self.total_step:08}_{self.r_max:09.3f}.pth"
                 torch.save(act.state_dict(), act_path)  # save policy network in *.pth
 
-                print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and print
+                logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |")  # save policy and logging.info
 
             '''record the training information'''
             self.used_time = int(time.time() - self.start_time)
@@ -242,17 +243,17 @@ class Evaluator_isaacgym:
             self.tensorboard.add_scalar("reward/std_reward_time", r_std, self.used_time)
             self.tensorboard.add_scalar("reward/exp_reward_time", r_exp, self.used_time)
 
-            '''print some information to Terminal'''
+            '''logging.info some information to Terminal'''
             if_reach_goal = bool(self.r_max > self.target_return)  # check if_reach_goal
             if if_reach_goal:
-                print(f"{'ID':<3}{'Step':>8}{'TargetR':>8} |"
+                logging.info(f"{'ID':<3}{'Step':>8}{'TargetR':>8} |"
                       f"{'avgR':>8}{'stdR':>7}{'avgS':>7}{'stdS':>6} |"
                       f"{'UsedTime':>8}  ########\n"
                       f"{self.agent_id:<3}{self.total_step:8.2e}{self.target_return:8.2f} |"
                       f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                       f"{self.used_time:>8}  ########")
 
-            print(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
+            logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
                   f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                   f"{r_exp:8.2f}{''.join(f'{n:7.2f}' for n in log_tuple)}")
 
@@ -261,7 +262,7 @@ class Evaluator_isaacgym:
 
             '''plot learning curve figure'''
             if len(self.recorder) == 0:
-                print("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
+                logging.info("| save_npy_draw_plot() WARNING: len(self.recorder)==0")
                 return None
 
             np.save(self.recorder_path, self.recorder)
@@ -393,7 +394,7 @@ def get_rewards_step_list_from_vec_env(env, act) -> list:  # todo
     # reward_list = torch.tensor(reward_list, dtype=torch.float32)
     # steps_list = torch.tensor(steps_list, dtype=torch.float32)
     #
-    # print(f'\n reward_list avg {reward_list.mean(0):9.2f}'
+    # logging.info(f'\n reward_list avg {reward_list.mean(0):9.2f}'
     #       f'\n             std {reward_list.std(0):9.2f}'
     #       f'\n  steps_list avg {steps_list.mean(0):9.2f}'
     #       f'\n             std {steps_list.std(0):9.2f}'
@@ -511,7 +512,7 @@ def demo_evaluator_actor_pth():
     r_s_ary = np.array(r_s_ary, dtype=np.float32)
     r_avg, s_avg = r_s_ary.mean(axis=0)  # average of episode return and episode step
 
-    print('r_avg, s_avg', r_avg, s_avg)
+    logging.info('r_avg, s_avg', r_avg, s_avg)
     return r_avg, s_avg
 
 
@@ -603,7 +604,7 @@ def demo_load_pendulum_and_render():
     # r_s_ary = np.array(r_s_ary, dtype=np.float32)
     # r_avg, s_avg = r_s_ary.mean(axis=0)  # average of episode return and episode step
     #
-    # print('r_avg, s_avg', r_avg, s_avg)
+    # logging.info('r_avg, s_avg', r_avg, s_avg)
     # exit()
 
     '''render'''
@@ -627,7 +628,7 @@ def demo_load_pendulum_and_render():
     returns = getattr(env, 'cumulative_returns', returns)
     steps += 1
 
-    print(f"\n| cumulative_returns {returns}"
+    logging.info(f"\n| cumulative_returns {returns}"
           f"\n|      episode steps {steps}")
 
 
@@ -660,8 +661,8 @@ def run():
     ][flag_id]
     env_name = env_args['env_name']
 
-    print('gpu_id', gpu_id)
-    print('env_name', env_name)
+    logging.info('gpu_id', gpu_id)
+    logging.info('env_name', env_name)
 
     '''save step_epi_r_s_ary'''
     # cwd_path = '.'
@@ -684,7 +685,7 @@ def run():
         step_epi_r_s_ary.append(ary)
     step_epi_r_s_ary = np.vstack(step_epi_r_s_ary)
     step_epi_r_s_ary = step_epi_r_s_ary[step_epi_r_s_ary[:, 0].argsort()]
-    print('step_epi_r_s_ary.shape', step_epi_r_s_ary.shape)
+    logging.info('step_epi_r_s_ary.shape', step_epi_r_s_ary.shape)
 
     '''plot'''
     import matplotlib.pyplot as plt
@@ -734,7 +735,7 @@ def run():
         ax_twin.tick_params(axis='y', labelcolor=color1)
         ax_twin.set_ylim(0, np.max(plot_y_step) * 2)
 
-    print('title', title)
+    logging.info('title', title)
     plt.title(title)
     plt.show()
 
