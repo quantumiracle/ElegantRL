@@ -5,6 +5,7 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from elegantrl.train.config import Arguments
 # import wandb
+import nni
 import logging
 
 
@@ -83,6 +84,7 @@ class Evaluator:
             logging.info(f"{self.agent_id:<3}{self.total_step:8.2e}{self.r_max:8.2f} |"
                   f"{r_avg:8.2f}{r_std:7.1f}{s_avg:7.0f}{s_std:6.0f} |"
                   f"{r_exp:8.2f}{''.join(f'{n:7.2f}' for n in log_tuple)}")
+            nni.report_intermediate_result(r_avg)
 
             self.tensorboard.add_scalar("info/r_max", self.r_max, self.total_step)
             self.tensorboard.add_scalar("info/r_avg", r_avg, self.total_step)
